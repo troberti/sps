@@ -14,15 +14,16 @@
 
 import os
 import logging
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp import template
-from google.appengine.ext.webapp.util import run_wsgi_app
+import webapp2 as webapp
+import jinja2
 from google.appengine.ext import db
 from appengine_utilities.sessions import Session
-
 from model import Task, Context, Domain, User
 import api
 
+# Load all templates
+PATH = os.path.join(os.path.dirname(__file__), 'templates')
+JINJA2_ENV = jinja2.Environment(loader=jinja2.FileSystemLoader(PATH))
 
 def add_message(session, message):
     """Adds a message to the current user's session.
@@ -91,8 +92,13 @@ def render_template(file, template_values):
     Returns:
         A string containing the rendered template.
     """
-    path = os.path.join(os.path.dirname(__file__), file)
-    return template.render(path, template_values)
+    template = JINJA2_ENV.get_template(file)
+    return template.render(template_values)
+#     path = os.path.join(os.path.dirname(__file__), 'templates/' + file)
+#     f = open(path, 'r')
+#     template = jinja2.Template(f.read())
+#     f.close()
+#     return template.render(template_values)
 
 
 class Landing(webapp.RequestHandler):
@@ -111,9 +117,9 @@ class Landing(webapp.RequestHandler):
                          for domain in domains],
             'messages': get_and_delete_messages(session),
             }
-        path = os.path.join(os.path.dirname(__file__),
-                        'templates/landing.html')
-        self.response.out.write(template.render(path, template_values))
+
+        self.response.out.write(render_template('landing.html',
+                                                template_values))
 
 
 class Overview(webapp.RequestHandler):
@@ -165,7 +171,7 @@ class Overview(webapp.RequestHandler):
             'no_tasks_message': no_tasks_message,
             'view_mode': view,
             }
-        self.response.out.write(render_template('templates/overview.html',
+        self.response.out.write(render_template('overview.html',
                                                 template_values))
 
 
@@ -230,7 +236,7 @@ class TaskDetail(webapp.RequestHandler):
             'subtasks_heading': subtasks_heading,
             'no_subtasks_description': no_subtasks_description,
             }
-        self.response.out.write(render_template('templates/taskdetail.html',
+        self.response.out.write(render_template('taskdetail.html',
                                                 template_values))
 
 
@@ -291,7 +297,7 @@ class GetSubTasks(webapp.RequestHandler):
             'view_mode': view,
             'show_radio_buttons': show_radio_buttons,
             }
-        self.response.out.write(render_template('templates/get-subtasks.html',
+        self.response.out.write(render_template('get-subtasks.html',
                                                 template_values))
 
 
@@ -339,7 +345,7 @@ class TaskEditView(webapp.RequestHandler):
             'show_radio_buttons': True,
             'view_mode': 'all',
             }
-        self.response.out.write(render_template('templates/edittask.html',
+        self.response.out.write(render_template('edittask.html',
                                                 template_values))
 
 
@@ -533,7 +539,8 @@ _DOMAIN_OPEN = '/d/(%s)/open/?' % _VALID_DOMAIN_KEY_NAME
 _TASK_URL = '%s/task/(%s)/?' % (_DOMAIN_URL, _VALID_TASK_KEY_NAME)
 _TASK_EDIT_URL = "%s/edit/?" % (_TASK_URL,)
 
-webapp.template.register_template_library('templatetags.templatefilters')
+#TODO(tijmen): Fix me
+#webapp.template.register_template_library('templatetags.templatefilters')
 
 application = webapp.WSGIApplication([('/create-task', CreateTask),
                                       ('/set-task-completed', CompleteTask),
@@ -549,8 +556,4 @@ application = webapp.WSGIApplication([('/create-task', CreateTask),
                                       (_TASK_URL, TaskDetail),
                                       ('/', Landing)])
 
-def main():
-    run_wsgi_app(application)
 
-if __name__ == "__main__":
-    main()

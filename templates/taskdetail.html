@@ -13,7 +13,7 @@
 <div class="task-description">
 <h2>{{ task_title|escape }}</h2>
 {% if task_description %}
-<div class="task-description-body">{{ task_description|markdown }}</div>
+<div class="task-description-body">{{ task_description }}</div>
 {% else %}
 <div class="no-task-description-body">
   <center>
@@ -61,7 +61,7 @@ Show: <a href="/d/{{ domain_identifier }}/task/{{ task_identifier }}?view=all">A
 <table>
   {% for task in subtasks %}
   {% include 'task-row.html' %}
-  {% empty %}
+  {% else %}
   <div class="no-tasks">
     <center>
       <p>{{ no_subtasks_description }}</p>

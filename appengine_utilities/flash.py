@@ -29,7 +29,7 @@ import os
 import Cookie
 from time import strftime
 
-from django.utils import simplejson
+import json as simplejson
 
 # settings
 try:

@@ -1,10 +1,16 @@
 application: firiplanning
-version: production
-runtime: python
+version: py27
+runtime: python27
 api_version: 1
+threadsafe: no
 
 builtins:
 - appstats: on
+
+libraries:
+- name: jinja2
+  version: "latest"
+
 
 handlers:
 - url: /images
@@ -12,11 +18,11 @@ handlers:
 - url: /css
   static_dir: css
 - url: /mapreduce(/.*)?
-  script: mapreduce/main.py
+  script: mapreduce.main.APP
   login: admin
 - url: /workers/.*
-  script: workers.py
+  script: workers.application
   login: admin
 - url: /.*
   login: required
-  script: main.py
+  script: main.application
