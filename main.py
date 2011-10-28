@@ -426,7 +426,6 @@ class MoveTask(webapp.RequestHandler):
         except (TypeError, ValueError):
             self.error(400)
             return
-        logging.info("d:%s t:%s p:%s", domain_identifier, task_identifier, new_parent_identifier)
         user = api.get_and_validate_user(domain_identifier)
         if not user:
             self.error(401)
