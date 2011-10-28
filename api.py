@@ -233,7 +233,7 @@ def can_edit_task(domain, task, user):
     """
     if domain.identifier() != task.domain_identifier():
         raise ValueError("Task is not in the domain '%s'" % domain.identifier())
-    return (task.user_identifier == user.identifier()
+    return (task.user_identifier() == user.identifier()
             or user.identifier() in domain.admins)
 
 
