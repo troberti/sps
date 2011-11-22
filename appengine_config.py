@@ -12,12 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""
-Selects the correct Django library version (1.2) for all wsgi_apps
-"""
-from google.appengine.dist import use_library
-use_library('django', '1.2')
-
 def webapp_add_wsgi_middleware(app):
     from google.appengine.ext.appstats import recording
     app = recording.appstats_wsgi_middleware(app)

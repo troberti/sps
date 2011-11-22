@@ -22,10 +22,9 @@ import logging
 from google.appengine.api import users, datastore
 from google.appengine.api import taskqueue
 from google.appengine.ext import db
-from google.appengine.ext import webapp
 from google.appengine.datastore import datastore_rpc
-from google.appengine.ext.webapp.util import run_wsgi_app
-import simplejson as json
+import webapp2 as webapp
+import json
 import api
 from model import Domain, Task, TaskIndex, Context, User
 
@@ -270,9 +269,3 @@ mapping = [
     ]
 
 application = webapp.WSGIApplication(mapping)
-
-def main():
-    run_wsgi_app(application)
-
-if __name__ == "__main__":
-    main()

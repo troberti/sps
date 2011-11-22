@@ -43,7 +43,8 @@ from time import strftime
 from google.appengine.ext import db
 from google.appengine.api import memcache
 
-from django.utils import simplejson
+# EDIT(tijmen): As simplejson is not available anymore
+import json as simplejson
 
 # settings
 try:

@@ -17,7 +17,7 @@ Model classes used in the planner.
 """
 import copy
 from google.appengine.ext import db
-import simplejson as json
+import json
 import aetycoon
 
 class Domain(db.Model):

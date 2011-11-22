@@ -61,7 +61,7 @@ Show: <a href="/d/{{ domain_identifier }}/task/{{ task_identifier }}?view=all">A
 <table>
   {% for task in subtasks %}
   {% include 'task-row.html' %}
-  {% empty %}
+  {% else %}
   <div class="no-tasks">
     <center>
       <p>{{ no_subtasks_description }}</p>
