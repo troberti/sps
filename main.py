@@ -21,9 +21,6 @@ from appengine_utilities.sessions import Session
 from model import Task, Context, Domain, User
 import api
 
-# Load all templates
-PATH = os.path.join(os.path.dirname(__file__), 'templates')
-JINJA2_ENV = jinja2.Environment(loader=jinja2.FileSystemLoader(PATH))
 
 def add_message(session, message):
     """Adds a message to the current user's session.
@@ -80,28 +77,26 @@ def _task_template_values(tasks, user, level=0):
             for task in tasks]
 
 
-def render_template(file, template_values):
-    """
-    Renders the template specified through file passing the given
-    template_values.
+class BaseHandler(webapp.RequestHandler):
+    @webapp2.cached_property
+    def jinja2(self):
+        return jinja2.get_jinja2(app=self.app)
 
-    Args:
-        file: relative path of the template file
-        template_values: dictionary of template values
+    def render_template(file, template_values):
+        """
+        Renders the template specified through file passing the given
+        template_values.
 
-    Returns:
-        A string containing the rendered template.
-    """
-    template = JINJA2_ENV.get_template(file)
-    return template.render(template_values)
-#     path = os.path.join(os.path.dirname(__file__), 'templates/' + file)
-#     f = open(path, 'r')
-#     template = jinja2.Template(f.read())
-#     f.close()
-#     return template.render(template_values)
+        Args:
+            file: relative path of the template file
+            template_values: dictionary of template values
 
+        Returns:
+            A string containing the rendered template.
+        """
+        self.response.write(self.jinja2.render_template(file, template_values))
 
-class Landing(webapp.RequestHandler):
+class Landing(BaseHandler):
     """
     The main landing page. Shows the users domains and links to them.
     """
@@ -117,9 +112,7 @@ class Landing(webapp.RequestHandler):
                          for domain in domains],
             'messages': get_and_delete_messages(session),
             }
-
-        self.response.out.write(render_template('landing.html',
-                                                template_values))
+        render_template('landing.html', template_values)
 
 
 class Overview(webapp.RequestHandler):
@@ -171,8 +164,7 @@ class Overview(webapp.RequestHandler):
             'no_tasks_message': no_tasks_message,
             'view_mode': view,
             }
-        self.response.out.write(render_template('overview.html',
-                                                template_values))
+        render_template('overview.html', template_values)
 
 
 class TaskDetail(webapp.RequestHandler):
@@ -236,8 +228,7 @@ class TaskDetail(webapp.RequestHandler):
             'subtasks_heading': subtasks_heading,
             'no_subtasks_description': no_subtasks_description,
             }
-        self.response.out.write(render_template('taskdetail.html',
-                                                template_values))
+        render_template('taskdetail.html', template_values)
 
 
 class GetSubTasks(webapp.RequestHandler):
@@ -297,8 +288,7 @@ class GetSubTasks(webapp.RequestHandler):
             'view_mode': view,
             'show_radio_buttons': show_radio_buttons,
             }
-        self.response.out.write(render_template('get-subtasks.html',
-                                                template_values))
+        render_template('get-subtasks.html', template_values)
 
 
 class TaskEditView(webapp.RequestHandler):
@@ -345,8 +335,7 @@ class TaskEditView(webapp.RequestHandler):
             'show_radio_buttons': True,
             'view_mode': 'all',
             }
-        self.response.out.write(render_template('edittask.html',
-                                                template_values))
+        render_template('edittask.html', template_values)
 
 
 class CreateTask(webapp.RequestHandler):
@@ -539,8 +528,14 @@ _DOMAIN_OPEN = '/d/(%s)/open/?' % _VALID_DOMAIN_KEY_NAME
 _TASK_URL = '%s/task/(%s)/?' % (_DOMAIN_URL, _VALID_TASK_KEY_NAME)
 _TASK_EDIT_URL = "%s/edit/?" % (_TASK_URL,)
 
-#TODO(tijmen): Fix me
-#webapp.template.register_template_library('templatetags.templatefilters')
+
+config = {
+    'webapp2_extras.jinja2': {
+        'filters': {
+            'markdown': templatetags.templatefilters.markdown
+            }
+        }
+    }
 
 application = webapp.WSGIApplication([('/create-task', CreateTask),
                                       ('/set-task-completed', CompleteTask),
@@ -554,6 +549,5 @@ application = webapp.WSGIApplication([('/create-task', CreateTask),
                                       (_DOMAIN_OPEN, Overview),
                                       (_TASK_EDIT_URL, TaskEditView),
                                       (_TASK_URL, TaskDetail),
-                                      ('/', Landing)])
-
-
+                                      ('/', Landing)],
+                                     config=config)

@@ -13,7 +13,7 @@
 <div class="task-description">
 <h2>{{ task_title|escape }}</h2>
 {% if task_description %}
-<div class="task-description-body">{{ task_description }}</div>
+<div class="task-description-body">{{ task_description|markdown }}</div>
 {% else %}
 <div class="no-task-description-body">
   <center>
