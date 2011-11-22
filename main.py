@@ -14,8 +14,8 @@
 
 import os
 import logging
-import webapp2 as webapp
-import jinja2
+import webapp2
+from webapp2_extras import jinja2
 from google.appengine.ext import db
 from appengine_utilities.sessions import Session
 from model import Task, Context, Domain, User
@@ -77,24 +77,26 @@ def _task_template_values(tasks, user, level=0):
             for task in tasks]
 
 
-class BaseHandler(webapp.RequestHandler):
+class BaseHandler(webapp2.RequestHandler):
     @webapp2.cached_property
     def jinja2(self):
         return jinja2.get_jinja2(app=self.app)
 
-    def render_template(file, template_values):
+    def render_template(self, filename, **template_args):
         """
         Renders the template specified through file passing the given
         template_values.
 
         Args:
-            file: relative path of the template file
+            filename: filename of the template
             template_values: dictionary of template values
 
         Returns:
             A string containing the rendered template.
         """
-        self.response.write(self.jinja2.render_template(file, template_values))
+        self.response.write(self.jinja2.render_template(
+                filename,
+                **template_args))
 
 class Landing(BaseHandler):
     """
@@ -112,10 +114,10 @@ class Landing(BaseHandler):
                          for domain in domains],
             'messages': get_and_delete_messages(session),
             }
-        render_template('landing.html', template_values)
+        self.render_template('landing.html', **template_values)
 
 
-class Overview(webapp.RequestHandler):
+class Overview(BaseHandler):
     """
     Overview of all tasks in a domain. The tasks can be filtered by
     all/open and yours. Additionally, there is a New Task field to
@@ -164,10 +166,10 @@ class Overview(webapp.RequestHandler):
             'no_tasks_message': no_tasks_message,
             'view_mode': view,
             }
-        render_template('overview.html', template_values)
+        self.render_template('overview.html', **template_values)
 
 
-class TaskDetail(webapp.RequestHandler):
+class TaskDetail(BaseHandler):
     """
     Handler to show the full task details.
     """
@@ -228,10 +230,10 @@ class TaskDetail(webapp.RequestHandler):
             'subtasks_heading': subtasks_heading,
             'no_subtasks_description': no_subtasks_description,
             }
-        render_template('taskdetail.html', template_values)
+        self.render_template('taskdetail.html', **template_values)
 
 
-class GetSubTasks(webapp.RequestHandler):
+class GetSubTasks(BaseHandler):
     """
     Handler for AJAX-requests to retrieve the direct subtasks of a
     task.  The returned output are html rows used in the task tables.
@@ -288,10 +290,10 @@ class GetSubTasks(webapp.RequestHandler):
             'view_mode': view,
             'show_radio_buttons': show_radio_buttons,
             }
-        render_template('get-subtasks.html', template_values)
+        self.render_template('get-subtasks.html', **template_values)
 
 
-class TaskEditView(webapp.RequestHandler):
+class TaskEditView(BaseHandler):
     """
     Handler to show the edit task gui. It shows an editable
     description of the task. Only a user that created the task
@@ -335,10 +337,10 @@ class TaskEditView(webapp.RequestHandler):
             'show_radio_buttons': True,
             'view_mode': 'all',
             }
-        render_template('edittask.html', template_values)
+        self.render_template('edittask.html', **template_values)
 
 
-class CreateTask(webapp.RequestHandler):
+class CreateTask(BaseHandler):
     """
     Handler for POST requests to create new tasks.
     """
@@ -376,7 +378,7 @@ class CreateTask(webapp.RequestHandler):
             self.redirect('/d/%s/' % domain)
 
 
-class EditTask(webapp.RequestHandler):
+class EditTask(BaseHandler):
     """
     Handler for POST requests to edit a task.
     """
@@ -408,7 +410,7 @@ class EditTask(webapp.RequestHandler):
         self.redirect('/d/%s/task/%s' % (domain_identifier, task_identifier))
 
 
-class MoveTask(webapp.RequestHandler):
+class MoveTask(BaseHandler):
     """
     Handler for POST requests to move the task to another
     parent task.
@@ -441,7 +443,7 @@ class MoveTask(webapp.RequestHandler):
         self.redirect('/d/%s/task/%s' % (domain_identifier, task_identifier))
 
 
-class CompleteTask(webapp.RequestHandler):
+class CompleteTask(BaseHandler):
     """Handler for POST requests to set the completed flag on a task.
 
     A user can only complete tasks that are assigned to him, and not the
@@ -466,7 +468,7 @@ class CompleteTask(webapp.RequestHandler):
             self.error(403)
 
 
-class AssignTask(webapp.RequestHandler):
+class AssignTask(BaseHandler):
     """Handler for POST requests to set the assignee property of a task.
     """
     def post(self):
@@ -495,7 +497,7 @@ class AssignTask(webapp.RequestHandler):
         self.redirect(self.request.headers.get('referer'))
 
 
-class CreateDomain(webapp.RequestHandler):
+class CreateDomain(BaseHandler):
     """Handler to create new domains.
     """
     def post(self):
@@ -527,26 +529,26 @@ _DOMAIN_OPEN = '/d/(%s)/open/?' % _VALID_DOMAIN_KEY_NAME
 _TASK_URL = '%s/task/(%s)/?' % (_DOMAIN_URL, _VALID_TASK_KEY_NAME)
 _TASK_EDIT_URL = "%s/edit/?" % (_TASK_URL,)
 
-
+from templatetags import templatefilters
 config = {
     'webapp2_extras.jinja2': {
         'filters': {
-            'markdown': templatetags.templatefilters.markdown
+            'markdown': templatefilters.markdown
             }
         }
     }
 
-application = webapp.WSGIApplication([('/create-task', CreateTask),
-                                      ('/set-task-completed', CompleteTask),
-                                      ('/assign-task', AssignTask),
-                                      ('/edit-task', EditTask),
-                                      ('/move-task', MoveTask),
-                                      ('/create-domain', CreateDomain),
-                                      ('/get-subtasks', GetSubTasks),
-                                      (_DOMAIN_URL, Overview),
-                                      (_DOMAIN_ALL, Overview),
-                                      (_DOMAIN_OPEN, Overview),
-                                      (_TASK_EDIT_URL, TaskEditView),
-                                      (_TASK_URL, TaskDetail),
-                                      ('/', Landing)],
-                                     config=config)
+application = webapp2.WSGIApplication([('/create-task', CreateTask),
+                                       ('/set-task-completed', CompleteTask),
+                                       ('/assign-task', AssignTask),
+                                       ('/edit-task', EditTask),
+                                       ('/move-task', MoveTask),
+                                       ('/create-domain', CreateDomain),
+                                       ('/get-subtasks', GetSubTasks),
+                                       (_DOMAIN_URL, Overview),
+                                       (_DOMAIN_ALL, Overview),
+                                       (_DOMAIN_OPEN, Overview),
+                                       (_TASK_EDIT_URL, TaskEditView),
+                                       (_TASK_URL, TaskDetail),
+                                       ('/', Landing)],
+                                      config=config)
