@@ -12,7 +12,7 @@
 <br>
 
 <h3>Move Task</h3>
-<p>Move this task '{{ task_title|escape }}' (and its {{ task_num_subtasks }} subtask{{ task.num_subtasks|pluralize }}) to a subtask of another task. Select the new parent task below.</p>
+<p>Assign this task '{{ task_title|escape }}' (and its subtasks) as a subtask of another task. Select the new parent task below.</p>
 
 <form  action="/move-task" method="post">
   <input type="hidden" name="domain" value="{{ domain_identifier }}">
