@@ -3,13 +3,11 @@
 <div class="breadcrumbs">
   <b>
     {% if parent_identifier %}
-    <a href="/d/{{ domain_identifier }}/task/{{ parent_identifier }}?view={{ view_mode }}">
-      {{ parent_title|escape }}
-    </a>
+    <a href="/d/{{ domain_identifier }}/task/{{ parent_identifier }}?view={{ view_mode }}">{{ parent_title|escape }}</a>
     {% else %}
     <a href="/d/{{ domain_identifier }}?view={{view_mode}}">{{ domain_name|escape }}</a>
     {% endif %}
-    {% if task_identifier %}/ {{ task_title|escape }}{% endif %}
+    {% if task_identifier %} / {{ task_title|escape }}{% endif %}
   </b>
 </div>
 
