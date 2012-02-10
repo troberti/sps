@@ -342,26 +342,29 @@ class Task(db.Model):
     def personalized_summary(self, user_identifier):
         """
         Returns a short string summary of the task with respect to a
-        particular user. The string has the form "X tasks, Y assigned
-        to you", where X is the number of atomic tasks and Y the
-        number of assigned tasks to the user with |user_identifier|.
+        particular user. The string displays the remaining number of
+        atomic tasks the user has yet to complete. If no tasks are
+        left for the user to complete, the empty string is returned.
 
-        If no tasks are assigned to that user, the returned string
-        will just say "X tasks".
-
-        If this task is an atomic task, the returned string will be
-        empty.
+        In case of an atomic tasks, the empty string is always
+        returned.
         """
         if self.atomic():
             return ""
-        count = self.atomic_task_count()
-        summary = "1 task" if count == 1 else "%d tasks" % count
+
         record = self.derived_assignees.get(user_identifier)
+        remaining = 0
         if record:
             all = record.get('all', 0)
             completed = record.get('completed', 0)
-            summary += ", %d out of %d completed" % (completed, all)
-        return summary
+            remaining = all - completed
+        if remaining > 0:
+            if remaining == 1:
+                return "1 task left"
+            else:
+                return "%d tasks left" % (remaining,)
+        return ""
+
 
     def is_active(self, user_identifier):
         """
