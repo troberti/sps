@@ -71,6 +71,7 @@ def _task_template_values(tasks, user, level=0):
               'assignee_description': task.assignee_description(),
               'can_complete': api.can_complete_task(task, user),
               'summary': task.personalized_summary(user_identifier),
+              'remaining': task.subtasks_remaining(user_identifier),
               'active': task.is_active(user_identifier),
               'atomic': task.atomic(),
               'id': task.identifier() }

@@ -94,3 +94,15 @@ a.new-task-title:hover {
 .codehilitetable td.linenos {
   width: 20px;
 }
+
+.tasks-remaining {
+  border-radius: 8px;
+  background-color: #999;
+  background-color: #06C;
+  color: #EEE;
+  text-align: center;
+  padding: 1px;
+  font-weight: bold;
+  width: 25px;
+}
+

@@ -19,7 +19,11 @@
     <a href="/d/{{ domain_identifier }}/task/{{ task.id }}?view={{ view_mode }}">{{ task.title|escape }}</a>
   </td>
   <td class="task-detail">
-    {{ task.summary }}
+    {% if task.remaining %}
+    <div class="tasks-remaining">
+      <div>{{ task.remaining }}</div>
+    </div>
+    {% endif %}
   </td>
   {% if task.can_assign_to_self %}
   <td class="assign-button">

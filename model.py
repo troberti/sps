@@ -339,6 +339,22 @@ class Task(db.Model):
         summary += " (%d completed)" % completed
         return summary
 
+    def subtasks_remaining(self, user_identifier):
+        """
+        Returns the number of atomic subtasks of this task, that the
+        user with the given |user_identifier| has left to complete.
+        """
+        if self.atomic():
+            return 0
+        record = self.derived_assignees.get(user_identifier)
+        remaining = 0
+        if record:
+            all = record.get('all', 0)
+            completed = record.get('completed', 0)
+            remaining = all - completed
+        return remaining
+
+
     def personalized_summary(self, user_identifier):
         """
         Returns a short string summary of the task with respect to a
