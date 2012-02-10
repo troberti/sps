@@ -77,7 +77,10 @@
 
 <div style="margin-top:5px">
 <div style="float: left">
-<b>{{ domain_name|escape }}</b>
+<div class="new-task-title">
+  <a id="new-task-title" class="new-task-title" href="#">Create New Task</a>
+</div>
+
 </div>
 <div style="float: right">
 logged in as: <b> {{ user_name|escape }}</b>
@@ -85,7 +88,6 @@ logged in as: <b> {{ user_name|escape }}</b>
 <hr>
 </div>
 
-<!--<div style="margin:10px"></div>-->
 
 {% if messages %}
 <ul>
@@ -94,3 +96,24 @@ logged in as: <b> {{ user_name|escape }}</b>
 {% endfor %}
 </ul>
 {% endif %}
+
+<div id="new-task-container" class="new-task-form">
+  <form id="new-task-form" action="/create-task" method="post">
+    Enter a task description. The first line of the description will
+    be used as the title of the task.<br>
+    {% if task_identifier %}
+    <b>This task will be created as a subtask of '{{ task_title }}</b>'
+    {% endif %}
+
+    <textarea  id="description-textarea" name="description"></textarea>
+    <div class="new-task-controls">
+      <div style="float:right"><input type="checkbox" name="assign_to_self"> assign task to yourself</div>
+      <input type="hidden" name="domain" value="{{ domain_identifier }}">
+      <input type="hidden" name="parent" value="{{ task_identifier }}">
+
+      <input id="new-task-submit" type="submit" value="Create Task">
+    </div>
+  </form>
+<hr>
+</div>
+

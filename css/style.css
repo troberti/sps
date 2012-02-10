@@ -49,6 +49,10 @@ td.expand-control {
   margin-bottom: 0.5em;
 }
 
+.new-task-controls {
+  margin-bottom: 1.0em;
+}
+
 a.plain {
   color: inherit;
   text-decoration: none;

@@ -1,18 +1,19 @@
 {% include 'sps-header.html' %}
 
-
-{% if task_identifier %}
-
 <div class="breadcrumbs">
   <b>
-{% if parent_identifier %}
-<a href="/d/{{ domain_identifier }}/task/{{ parent_identifier }}?view={{ view_mode }}">{{ parent_title|escape }}</a>
-{% else %}
-<a href="/d/{{ domain_identifier }}?view={{view_mode}}">{{ domain_name|escape }}</a>
-{% endif %}
-/ {{ task_title|escape }}</b>
+    {% if parent_identifier %}
+    <a href="/d/{{ domain_identifier }}/task/{{ parent_identifier }}?view={{ view_mode }}">
+      {{ parent_title|escape }}
+    </a>
+    {% else %}
+    <a href="/d/{{ domain_identifier }}?view={{view_mode}}">{{ domain_name|escape }}</a>
+    {% endif %}
+    {% if task_identifier %}/ {{ task_title|escape }}{% endif %}
+  </b>
 </div>
 
+{% if task_identifier %}
 <div class="task-description">
 <h2>{{ task_title|escape }}</h2>
 {% if task_description %}
@@ -53,8 +54,6 @@
 <hr>
 
 {% endif %}
-
-{% include 'new-task.html' %}
 
 <center>
 <ul class="segmented-control">
