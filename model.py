@@ -322,6 +322,23 @@ class Task(db.Model):
         else:
             return ', '.join(assignee['name'] for assignee in sorted_assignees)
 
+    def summary(self):
+        """
+        Returns a short summary of the task of the form "X tasks (Y
+        completed)", where X is the number of atomic tasks of this
+        task, and Y the number of atomic tasks that have been
+        completed. If this tasks is an atomic task itself, the empty
+        string is returned.
+        """
+        if self.atomic():
+            return ""
+        count = self.atomic_task_count()
+        summary = "1 task" if count == 1 else "%d tasks" % count
+        completed = sum(r['completed'] for r
+                        in self.derived_assignees.itervalues())
+        summary += " (%d completed)" % completed
+        return summary
+
     def personalized_summary(self, user_identifier):
         """
         Returns a short string summary of the task with respect to a
