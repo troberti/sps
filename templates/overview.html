@@ -2,13 +2,20 @@
 
 {% include 'new-task.html' %}
 
-<p>
-Show: <a href="/d/{{ domain_identifier }}?view=all">All Tasks</a>
-, <a href="/d/{{ domain_identifier }}?view=open">Open Tasks</a>
-, <a href="/d/{{ domain_identifier }}?view=yours">Your Tasks</a>
+<center>
+<ul class="segmented-control">
+    <li {% if view_mode == 'all' %}class="active"{% endif %}>
+      <a href="/d/{{ domain_identifier }}?view=all">All Tasks</a>
+    </li>
+    <li {% if view_mode == 'open' %}class="active"{% endif %}>
+      <a href="/d/{{ domain_identifier }}?view=open">Open Tasks</a>
+    </li>
+    <li {% if view_mode == 'yours' %}class="active"{% endif %}>
+      <a href="/d/{{ domain_identifier }}?view=yours">Your Tasks</a>
+    </li>
+</ul>
+</center>
 
-
-<h3>{{ tasks_heading }}</h3>
 {% if tasks %}
 <form>
   <table>
