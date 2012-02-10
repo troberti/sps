@@ -2,7 +2,7 @@ application: firiplanning
 version: production
 runtime: python27
 api_version: 1
-threadsafe: no
+threadsafe: yes
 
 builtins:
 - appstats: on
