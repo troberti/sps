@@ -117,86 +117,42 @@ class Landing(BaseHandler):
         self.render_template('landing.html', **template_values)
 
 
-class Overview(BaseHandler):
-    """
-    Overview of all tasks in a domain. The tasks can be filtered by
-    all/open and yours. Additionally, there is a New Task field to
-    created new tasks with.
-    """
-    def get(self, domain_identifier):
-        user = api.get_and_validate_user(domain_identifier)
-        if not user:
-            self.error(404)     # hides domain identifiers
-            return
-        session = Session(writer='cookie',
-                          wsgiref_headers=self.response.headers)
-        view = self.request.get('view', 'all')
-        domain = api.get_domain(domain_identifier)
-        if view == 'yours':
-            tasks = api.get_assigned_tasks(domain_identifier,
-                                           user,
-                                           root_task=None,
-                                           limit=200)
-            no_tasks_message = "You do not have any unfinished tasks"
-            tasks_heading = "Your Tasks"
-        elif view == 'open':
-            tasks = api.get_open_tasks(domain_identifier,
-                                       root_task=None,
-                                       limit=200)
-            no_tasks_message = "No open subtasks in this domain"
-            tasks_heading = "Open Tasks"
-        else:                   # view == 'all' or None
-            view = 'all'
-            user_id = user.identifier()
-            tasks = api.get_all_direct_subtasks(domain_identifier,
-                                                root_task=None,
-                                                limit=200,
-                                                user_identifier=user_id)
-            tasks_heading = "All Tasks"
-            no_tasks_message = "No tasks are created in this domain"
-
-        template_values = {
-            'domain_name': domain.name,
-            'domain_identifier': domain_identifier,
-            'user_name': user.name,
-            'user_identifier': user.identifier(),
-            'messages': get_and_delete_messages(session),
-            'tasks': _task_template_values(tasks, user),
-            'tasks_heading': tasks_heading,
-            'no_tasks_message': no_tasks_message,
-            'view_mode': view,
-            }
-        self.render_template('overview.html', **template_values)
-
-
 class TaskDetail(BaseHandler):
     """
-    Handler to show the full task details.
+    Main handler for most of the request. If only a domain_identifier
+    is provided, then it shows the top level tasks of the domain. If
+    also a task_identifier is provided, then it shows the task details
+    and its subtasks.
     """
-    def get(self, domain_identifier, task_identifier):
-        task = api.get_task(domain_identifier, task_identifier)
+    def get(self, *args):
+        domain_identifier = args[0]
         user = api.get_and_validate_user(domain_identifier)
+        if not user:
+            self.abort(404)
+
+        task_identifier = args[1] if len(args) > 1 else None
+        if task_identifier:
+            task = api.get_task(domain_identifier, task_identifier)
+            if not task:
+                self.abort(404)
+        else:
+            task = None         # No task specified
         view = self.request.get('view', 'all')
-        if not task or not user:
-            self.error(404)
-            return
         session = Session(writer='cookie',
                           wsgiref_headers=self.response.headers)
-        user = api.get_logged_in_user()
+
         domain = api.get_domain(domain_identifier)
         if view == 'yours':
             subtasks = api.get_assigned_tasks(domain_identifier,
                                               user,
                                               root_task=task,
                                               limit=200)
-            subtasks_heading = "Subtasks of '%s' Assigned to You" % task.title()
-            no_subtasks_description = "No subtasks are assigned to you."
+            no_tasks_description = "No tasks are assigned to you."
         elif view == 'open':
             subtasks = api.get_open_tasks(domain_identifier,
                                           root_task=task,
                                           limit=200)
-            subtasks_heading = "Open Subtasks of '%s'" % task.title()
-            no_subtasks_description = "No open subtasks for this task."
+            no_tasks_description = "No open tasks for this task."
         else:                   # view == 'all' or None
             view = 'all'
             user_id = user.identifier()
@@ -204,12 +160,27 @@ class TaskDetail(BaseHandler):
                                                    root_task=task,
                                                    limit=200,
                                                    user_identifier=user_id)
-            subtasks_heading = "All Subtasks of '%s'" % task.title()
-            no_subtasks_description = "No subtasks for this task."
+            no_tasks_description = "No subtasks for this task."
 
-        parent_task = task.parent_task
+        parent_task = task.parent_task if task else None
         parent_identifier = parent_task.identifier() if parent_task else ""
         parent_title = parent_task.title() if parent_task else ""
+
+        if task:
+            task_values = {
+                'task_title' : task.title(),
+                'task_description': task.description_body(),
+                'task_assignee': task.assignee_description(),
+                'task_identifier': task.identifier(),
+                'task_has_subtasks': not task.atomic(),
+                'task_can_assign_to_self': api.can_assign_to_self(task, user),
+                'task_can_edit': api.can_edit_task(domain, task, user),
+                }
+        else:
+            task_values = {}
+        base_url = '/d/' + domain_identifier
+        if task:
+            base_url += '/task/' + task_identifier
         template_values = {
             'domain_name': domain.name,
             'domain_identifier': domain_identifier,
@@ -217,19 +188,14 @@ class TaskDetail(BaseHandler):
             'user_name': user.name,
             'user_identifier': user.identifier(),
             'messages': get_and_delete_messages(session),
-            'task_title' : task.title(),
-            'task_description': task.description_body(),
-            'task_assignee': task.assignee_description(),
-            'task_identifier': task.identifier(),
-            'task_has_subtasks': not task.atomic(),
-            'task_can_assign_to_self': api.can_assign_to_self(task, user),
-            'task_can_edit': api.can_edit_task(domain, task, user),
             'subtasks': _task_template_values(subtasks, user),
+            'task_identifier': task_identifier, # None if no task is selected
             'parent_identifier': parent_identifier,
             'parent_title': parent_title,
-            'subtasks_heading': subtasks_heading,
-            'no_subtasks_description': no_subtasks_description,
+            'no_tasks_description': no_tasks_description,
+            'base_url': base_url,
             }
+        template_values.update(task_values)
         self.render_template('taskdetail.html', **template_values)
 
 
@@ -523,8 +489,6 @@ _VALID_DOMAIN_KEY_NAME = api.VALID_DOMAIN_IDENTIFIER
 _VALID_TASK_KEY_NAME = '[a-z0-9-]{1,100}'
 
 _DOMAIN_URL = '/d/(%s)/?' % _VALID_DOMAIN_KEY_NAME
-_DOMAIN_ALL = '/d/(%s)/all/?' % _VALID_DOMAIN_KEY_NAME
-_DOMAIN_OPEN = '/d/(%s)/open/?' % _VALID_DOMAIN_KEY_NAME
 
 _TASK_URL = '%s/task/(%s)/?' % (_DOMAIN_URL, _VALID_TASK_KEY_NAME)
 _TASK_EDIT_URL = "%s/edit/?" % (_TASK_URL,)
@@ -545,10 +509,8 @@ application = webapp2.WSGIApplication([('/create-task', CreateTask),
                                        ('/move-task', MoveTask),
                                        ('/create-domain', CreateDomain),
                                        ('/get-subtasks', GetSubTasks),
-                                       (_DOMAIN_URL, Overview),
-                                       (_DOMAIN_ALL, Overview),
-                                       (_DOMAIN_OPEN, Overview),
                                        (_TASK_EDIT_URL, TaskEditView),
                                        (_TASK_URL, TaskDetail),
+                                       (_DOMAIN_URL, TaskDetail),
                                        ('/', Landing)],
                                       config=config)

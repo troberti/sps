@@ -67,15 +67,25 @@
 </head>
 <body>
 
-<div style="float: left;">
+<!--
+<div style="padding: 2px; background-color: #EEE">
 <h3>
   <a href="/d/{{ domain_identifier }}?view={{ view_mode }}" class='plain' title="Back to overview">{{ domain_name|escape }}</a>
 </h3>
 </div>
-<div style="float: right; margin-top: 1.5em'">
+-->
+
+<div style="margin-top:5px">
+<div style="float: left">
+<b>{{ domain_name|escape }}</b>
+</div>
+<div style="float: right">
 logged in as: <b> {{ user_name|escape }}</b>
 </div>
 <hr>
+</div>
+
+<!--<div style="margin:10px"></div>-->
 
 {% if messages %}
 <ul>

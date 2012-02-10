@@ -1,13 +1,16 @@
 {% include 'sps-header.html' %}
 
+
+{% if task_identifier %}
+
 <div class="breadcrumbs">
-<b>
+  <b>
 {% if parent_identifier %}
-<a href="/d/{{ domain_identifier }}/task/{{ parent_identifier }}?view={{ view_mode }}">{{ parent_title }}</a>
+<a href="/d/{{ domain_identifier }}/task/{{ parent_identifier }}?view={{ view_mode }}">{{ parent_title|escape }}</a>
 {% else %}
-<a href="/d/{{ domain_identifier }}?view={{view_mode}}">Task Overview</a>
+<a href="/d/{{ domain_identifier }}?view={{view_mode}}">{{ domain_name|escape }}</a>
 {% endif %}
-/ {{ task_title }}</b>
+/ {{ task_title|escape }}</b>
 </div>
 
 <div class="task-description">
@@ -49,20 +52,20 @@
 </div>
 <hr>
 
-{% include 'new-task.html' %}
+{% endif %}
 
-{% if task_has_subtasks %}
+{% include 'new-task.html' %}
 
 <center>
 <ul class="segmented-control">
     <li {% if view_mode == 'all' %}class="active"{% endif %}>
-      <a href="/d/{{ domain_identifier }}/task/{{ task_identifier }}?view=all">All Tasks</a>
+      <a href="{{ base_url }}?view=all">All Tasks</a>
     </li>
     <li {% if view_mode == 'open' %}class="active"{% endif %}>
-      <a href="/d/{{ domain_identifier }}/task/{{ task_identifier }}?view=open">Open Tasks</a>
+      <a href="{{ base_url }}?view=open">Open Tasks</a>
     </li>
     <li {% if view_mode == 'yours' %}class="active"{% endif %}>
-      <a href="/d/{{ domain_identifier }}/task/{{ task_identifier }}?view=yours">Your Tasks</a>
+      <a href="{{ base_url }}?view=yours">Your Tasks</a>
     </li>
 </ul>
 </center>
@@ -73,13 +76,11 @@
   {% else %}
   <div class="no-tasks">
     <center>
-      <p>{{ no_subtasks_description }}</p>
+      <p>{{ no_tasks_description }}</p>
     </center>
   </div>
   {% endfor %}
 </table>
-
-{% endif %}
 
 </body>
 </html>
