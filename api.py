@@ -637,7 +637,8 @@ def get_assigned_tasks(domain_identifier,
         query = TaskIndex.all(keys_only=True).\
             ancestor(Domain.key_from_name(domain_identifier)).\
             filter('assignees =', user.identifier()).\
-            filter('level =', level)
+            filter('level =', level).\
+            filter('completed =', False)
         if root_task:
             query.filter('hierarchy =', root_task.identifier())
         fetched = query.fetch(limit)
