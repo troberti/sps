@@ -132,9 +132,9 @@ class UpdateTaskCompletion(webapp.RequestHandler):
         if DEV_SERVER:
             db.run_in_transaction(txn)
         else:
-            options = datastore_rpc.TransactionOptions(
-                allow_multiple_entity_groups=True)
-            datastore.RunInTransactionOptions(options, txn)
+            xg_on = db.create_transaction_options(xg=True)
+            db.run_in_transaction_options(xg_on, txn)
+
 
 
     @staticmethod
