@@ -64,16 +64,9 @@
       });
     });
   </script>
+  <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
-
-<!--
-<div style="padding: 2px; background-color: #EEE">
-<h3>
-  <a href="/d/{{ domain_identifier }}?view={{ view_mode }}" class='plain' title="Back to overview">{{ domain_name|escape }}</a>
-</h3>
-</div>
--->
 
 <div style="margin-top:5px">
 <div style="float: left">
@@ -117,3 +110,7 @@ logged in as: <b> {{ user_name|escape }}</b>
 <hr>
 </div>
 
+{% block body %}{% endblock %}
+
+</body>
+</html>

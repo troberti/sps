@@ -1,5 +1,8 @@
-{% include 'sps-header.html' %}
+{% extends 'sps-header.html' %}
 
+{% block title %}Edit Task {% endblock %}
+
+{% block body %}
 <h3>Edit Task</h3>
 <form action="/edit-task" method="post">
   Task description. The first line of the description will be used as the
@@ -27,3 +30,4 @@
 
 </body>
 </html>
+{% endblock %}

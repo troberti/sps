@@ -1,5 +1,14 @@
-{% include 'sps-header.html' %}
+{% extends 'sps-header.html' %}
 
+{% block title %}
+{% if task_title %}
+{{ task_title|escape }} - SPS
+{% else %}
+{{ domain_name }} - SPS
+{% endif %}
+{% endblock %}
+
+{% block body %}
 <div class="breadcrumbs">
   <b>
     {% if parent_identifier %}
@@ -13,16 +22,16 @@
 
 {% if task_identifier %}
 <div class="task-description">
-<h2>{{ task_title|escape }}</h2>
-{% if task_description %}
-<div class="task-description-body">{{ task_description|markdown }}</div>
-{% else %}
-<div class="no-task-description-body">
-  <center>
-    <p>No extra description has been entered for this task.</p>
-  </center>
-</div>
-{% endif %}
+  <h2>{{ task_title|escape }}</h2>
+  {% if task_description %}
+  <div class="task-description-body">{{ task_description|markdown }}</div>
+  {% else %}
+  <div class="no-task-description-body">
+    <center>
+      <p>No extra description has been entered for this task.</p>
+    </center>
+  </div>
+  {% endif %}
 </div>
 
 
@@ -79,5 +88,4 @@
   {% endfor %}
 </table>
 
-</body>
-</html>
+{% endblock %}
