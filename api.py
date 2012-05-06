@@ -320,9 +320,10 @@ def create_task(domain_identifier,
                     description=description,
                     user=user,
                     context=user.default_context_key())
-        # TODO(tijmen): This get is redundant, the key can
-        # be derived from the identifier and the domain.
         parent_task = get_task(domain_identifier, parent_task_identifier)
+        if parent_task_identifier and not parent_task:
+            raise ValueError("Parent task '%s' does not exist" %
+                             parent_task_identifier)
         task.parent_task = parent_task
         task.put()
         workers.UpdateTaskCompletion.enqueue(domain_identifier,

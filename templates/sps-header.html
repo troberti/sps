@@ -102,8 +102,9 @@ logged in as: <b> {{ user_name|escape }}</b>
     <div class="new-task-controls">
       <div style="float:right"><input type="checkbox" name="assign_to_self"> assign task to yourself</div>
       <input type="hidden" name="domain" value="{{ domain_identifier }}">
+      {% if task_identifier %}
       <input type="hidden" name="parent" value="{{ task_identifier }}">
-
+      {% endif %}
       <input id="new-task-submit" type="submit" value="Create Task">
     </div>
   </form>
