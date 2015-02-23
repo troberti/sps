@@ -147,19 +147,19 @@ class TaskDetail(BaseHandler):
             subtasks = api.get_assigned_tasks(domain_identifier,
                                               user,
                                               root_task=task,
-                                              limit=200)
+                                              limit=500)
             no_tasks_description = "No tasks are assigned to you."
         elif view == 'open':
             subtasks = api.get_open_tasks(domain_identifier,
                                           root_task=task,
-                                          limit=200)
+                                          limit=500)
             no_tasks_description = "No open tasks for this task."
         else:                   # view == 'all' or None
             view = 'all'
             user_id = user.identifier()
             subtasks = api.get_all_direct_subtasks(domain_identifier,
                                                    root_task=task,
-                                                   limit=200,
+                                                   limit=500,
                                                    user_identifier=user_id)
             no_tasks_description = "No subtasks for this task."
 
