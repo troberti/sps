@@ -233,8 +233,10 @@ def can_edit_task(domain, task, user):
     """
     if domain.identifier() != task.domain_identifier():
         raise ValueError("Task is not in the domain '%s'" % domain.identifier())
-    return (task.user_identifier() == user.identifier()
-            or user.identifier() in domain.admins)
+    # For now everyone in the domain can edit/move etc
+    return domain.identifier() in user.domains
+#    return (task.user_identifier() == user.identifier()
+#            or user.identifier() in domain.admins)
 
 
 def can_assign_task(task, user, assignee):
@@ -490,9 +492,9 @@ def change_task_parent(domain_identifier,
         task = get_task(domain_identifier, task_identifier)
         new_parent = get_task(domain_identifier, new_parent_identifier)
 
-        if (not task.user_identifier() == user.identifier()
-            and not user_is_admin):
-            raise ValueError("User did not create task")
+#        if (not task.user_identifier() == user.identifier()
+#            and not user_is_admin):
+#            raise ValueError("User did not create task")
         if _check_for_cycle(task, new_parent):
             raise ValueError("Cycle detected")
 
