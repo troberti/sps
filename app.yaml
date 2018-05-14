@@ -4,8 +4,6 @@ runtime: python27
 api_version: 1
 threadsafe: yes
 
-builtins:
-- appstats: on
 
 libraries:
 - name: jinja2
@@ -28,4 +26,5 @@ handlers:
   login: admin
 - url: /.*
   login: required
+  secure: always
   script: main.application
