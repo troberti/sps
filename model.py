@@ -291,6 +291,12 @@ class Task(db.Model):
         key = self.user_key()
         return key.name()
 
+    def user_name(self):
+        """
+        Returns the name (email address) of the user that has created this task.
+        """
+        return self.user.name
+
     def assignee_key(self):
         """
         Returns the key of the |assignee| without dereferencing the property.

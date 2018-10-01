@@ -172,6 +172,7 @@ class TaskDetail(BaseHandler):
                 'task_title' : task.title(),
                 'task_description': task.description_body(),
                 'task_assignee': task.assignee_description(),
+                'task_creator': task.user_name(),
                 'task_identifier': task.identifier(),
                 'task_has_subtasks': not task.atomic(),
                 'task_can_assign_to_self': api.can_assign_to_self(task, user),

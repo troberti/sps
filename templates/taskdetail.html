@@ -18,6 +18,11 @@
     {% endif %}
     {% if task_identifier %} / {{ task_title|escape }}{% endif %}
   </b>
+{% if task_creator %}
+<div style="float: right;">
+  <p>Created by {{ task_creator|escape }}</p>
+</div>
+{% endif %}
 </div>
 
 {% if task_identifier %}
